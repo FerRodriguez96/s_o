@@ -32,7 +32,7 @@
         programa debe mostrar un mensaje de error y terminar.
 */
 
-void eliminar_contenido(int numero, char* ruta){
+void eliminar_contenido(int numero, char* ruta, char*ejecutable){
 
     //declaracion de esctructuras
     DIR * dirp;
@@ -58,7 +58,7 @@ void eliminar_contenido(int numero, char* ruta){
         {
             if((S_ISREG(atributos.st_mode) != 0) && atributos.st_size >= numero)
             {
-                if (((atributos.st_mode & S_IXUSR) != 0) && (atributos.st_mode & S_IRUSR != 0))
+                if (direntp->d_name != ejecutable)
                 {
                     if (unlink(direntp->d_name) == -1){
                         perror("Error al eliminar el archivo regular");
@@ -71,6 +71,8 @@ void eliminar_contenido(int numero, char* ruta){
             }
         }
     }
+
+    closedir(dirp);
 }
 
 int main(int argc, char* argv[]){
@@ -80,6 +82,8 @@ int main(int argc, char* argv[]){
         perror("No se han ingresado la cantidad correcta de argumentos");
         exit(1);
     }
+
+    char* ejecutable = argv[0];
 
     // asignacion del numero ingresado por parametro
     int numero = atoi(argv[1]);
@@ -110,7 +114,7 @@ int main(int argc, char* argv[]){
     }
 
     //llamado a funcion
-    eliminar_contenido(numero, buf);
+    eliminar_contenido(numero, buf, ejecutable);
     
     return(0);
 }
