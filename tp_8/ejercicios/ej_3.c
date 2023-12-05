@@ -52,27 +52,47 @@ void eliminar_contenido(int numero, char* ruta, char*ejecutable){
         exit(1);
     }
 
+    FILE *control = fopen("control.txt", "w");
+
+    if (control == NULL){
+        perror("Error al abrir el archivo");
+        exit(1);
+    }
+
     while ((direntp = readdir(dirp)) != NULL)
     {
         if ((stat(direntp->d_name, &atributos) == 0))
         {
             if((S_ISREG(atributos.st_mode) != 0) && atributos.st_size >= numero)
             {
-                if (direntp->d_name != ejecutable)
+                if (strcmp(direntp->d_name, ejecutable) != 0)
                 {
+                    char *nombreArchivo = direntp->d_name;
+
+                    cant_reg = cant_reg + atributos.st_size;
+
                     if (unlink(direntp->d_name) == -1){
                         perror("Error al eliminar el archivo regular");
                     }
                     else
                     {
+                        fprintf(control, "Se ha eliminado el archivo %s del directorio", nombreArchivo);
                         printf("Se ha eliminado el archivo regular: %s\n", direntp->d_name);
                     }
                 }
+            }else if(S_ISDIR(atributos.st_mode)){
+
+            }else{
+                cant_otros++;
             }
         }
     }
 
+    printf("La cantidad de bytes de archivos regulares eliminados del directorio es de %lld", cant_reg);
+    printf("La cantidad de otros archivos en el directorio es de %d", cant_otros);
+
     closedir(dirp);
+    fclose(control);
 }
 
 int main(int argc, char* argv[]){
